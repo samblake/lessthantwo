@@ -1,9 +1,9 @@
 'use strict'
 
 const AWS = require('aws-sdk');
-const dynamo = new AWS.DynamoDB.DocumentClient();
 
 AWS.config.update({ region: "eu-west-1" })
+const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TABLE = 'rooms';
 
@@ -12,30 +12,42 @@ const successfulResponse = {
   body: "All good"
 }
 
-module.exports.connectHandler = (event, context, callback) => {
+module.exports.connectHandler = async event => {
   console.log(event)
-  addConnection(event.requestContext.connectionId)
-      .then(() => callback(null, successfulResponse))
-      .catch(err => errorResponse("Failed to connect", err, callback));
+  try {
+    await addConnection(event.requestContext.connectionId)
+    return successfulResponse;
+  }
+  catch (err) {
+    return errorResponse("Failed to connect", err)
+  }
 }
 
-module.exports.disconnectHandler = (event, context, callback) => {
+module.exports.disconnectHandler = async event => {
   console.log(event)
-  removeConnection(event.requestContext.connectionId)
-      .then(() => callback(null, successfulResponse))
-      .catch(err => errorResponse("Failed to disconnect", err, callback));
+  try {
+    await removeConnection(event.requestContext.connectionId)
+    return successfulResponse;
+  }
+  catch (err) {
+    return errorResponse("Failed to disconnect", err)
+  }
 }
 
-module.exports.messageHandler = (event, context, callback) => {
+module.exports.messageHandler = async event => {
   console.log(event)
-  sendMessage(event)
-      .then(() => callback(null, successfulResponse))
-      .catch(err => errorResponse("Failed to process message", err, callback));
+  try {
+    await sendMessage(event)
+    return successfulResponse;
+  }
+  catch (err) {
+    return errorResponse("Failed to process message", err)
+  }
 }
 
-module.exports.defaultHandler = (event, context, callback) => {
+module.exports.defaultHandler = async event => {
   console.log("defaultHandler was called: " + event)
-  callback(null, successfulResponse);
+  return successfulResponse;
 }
 
 
@@ -59,41 +71,31 @@ function removeConnection(connectionId) {
   }).promise();
 }
 
-function getConnectionIds() {
-  return dynamo.scan({
+async function sendMessage(event) {
+  const connectionData = await dynamo.scan({
     TableName: TABLE,
     ProjectionExpression: 'connectionId'
   }).promise();
-}
-
-function sendMessage(event) {
-  return getConnectionIds().then(connectionData => {
-    return connectionData.Items.map(connectionId => {
-      return send(event, connectionId.connectionId);
-    });
-  });
-}
-
-function send(event, connectionId) {
-  const body = JSON.parse(event.body);
-  const postData = body.data;
 
   const gatewayApi = new AWS.ApiGatewayManagementApi({
     apiVersion: "2018-11-29",
     endpoint: event.requestContext.domainName + "/" + event.requestContext.stage
   });
 
-  return gatewayApi.postToConnection({
-    ConnectionId: connectionId,
-    Data: postData
-  }).promise();
-};
+  const calls = connectionData.Items.map(async ({ connectionId }) => {
+    await gatewayApi.postToConnection({
+      ConnectionId: connectionId,
+      Data: JSON.parse(event.body).data
+    }).promise();
+  });
 
+  await Promise.all(calls);
+}
 
-function errorResponse(message, err, callback) {
+function errorResponse(message, err) {
   console.error(err);
-  callback(null, {
+  return {
     statusCode: 500,
     body: message + ": " + JSON.stringify(err)
-  });
+  };
 }
