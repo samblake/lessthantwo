@@ -1,0 +1,4 @@
+.idea
+.build
+.serverless
+node_modules
