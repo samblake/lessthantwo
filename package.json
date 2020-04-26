@@ -2,7 +2,7 @@
   "name": "lessthantwo",
   "version": "1.0.0",
   "description": "",
-  "main": "handler.js",
+  "main": "server/handler.js",
   "dependencies": {
     "@types/aws-lambda": "^8.10.50",
     "aws-sdk": "^2.658.0"

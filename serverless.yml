@@ -32,25 +32,25 @@ provider:
 
 functions:
   connectHandler:
-    handler: handler.connectHandler
+    handler: server/handler.connectHandler
     events:
       - websocket:
           route: $connect
 
   disconnectHandler:
-    handler: handler.disconnectHandler
+    handler: server/handler.disconnectHandler
     events:
       - websocket:
           route: $disconnect
           
   defaultHandler:
-    handler: handler.defaultHandler
+    handler: server/handler.defaultHandler
     events:
       - websocket:
           route: $default
           
   messageHandler:
-    handler: handler.messageHandler
+    handler: server/handler.messageHandler
     events:
       - websocket:
           route: message
