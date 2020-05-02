@@ -1,6 +1,8 @@
-import {APIGatewayEvent} from "aws-lambda";
-import {WsResponse} from "../../common/types";
-import {errorResponse, successfulResponse} from "./common";
+'use strict'
+
+import { APIGatewayEvent } from "aws-lambda";
+import { WsResponse } from "../../common/model";
+import { errorResponse, successfulResponse } from "./common";
 import * as repo from "../repo";
 import * as ws from "../ws";
 
@@ -8,7 +10,7 @@ export async function handle(event: APIGatewayEvent): Promise<WsResponse> {
     console.log(event)
     try {
         await sendMessage(event)
-        return successfulResponse
+        return new successfulResponse()
     }
     catch (err) {
         return errorResponse("Failed to process message", err)

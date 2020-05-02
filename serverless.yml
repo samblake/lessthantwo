@@ -5,8 +5,8 @@ org: sbadams
 
 plugins:
   - serverless-plugin-typescript
-  - serverless-offline
   - serverless-dynamodb-local
+  - serverless-offline
 
 provider:
   name: aws
@@ -28,6 +28,9 @@ provider:
         - "execute-api:ManageConnections"
       Resource:
         - "arn:aws:execute-api:*:*:**/@connections/*"
+
+  environment:
+    isLocal: ${self:custom.isLocal.${self:custom.currentStage}}
 
 
 functions:
@@ -63,9 +66,22 @@ resources:
       Properties:
         TableName: rooms
         AttributeDefinitions:
-          - AttributeName: connectionId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: connectionId
+          - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+
+custom:
+  dynamodb:
+    stages:
+      - local
+    start:
+      migrate: true
+
+  currentStage: ${opt:stage, self:provider.stage}
+  isLocal:
+    local: true
+    dev: false

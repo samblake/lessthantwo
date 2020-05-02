@@ -1,5 +1,7 @@
-import {APIGatewayEventRequestContextWithAuthorizer} from "aws-lambda";
-import {ApiGatewayManagementApi} from "aws-sdk";
+'use strict'
+
+import { APIGatewayEventRequestContextWithAuthorizer } from "aws-lambda";
+import { ApiGatewayManagementApi } from "aws-sdk";
 
 export async function sendAll(requestContext: APIGatewayEventRequestContextWithAuthorizer<any>, connectionIds: string[], data: any) {
     const gatewayApi: ApiGatewayManagementApi = new ApiGatewayManagementApi({

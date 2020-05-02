@@ -9,9 +9,10 @@
   },
   "devDependencies": {
     "@types/node": "^13.13.0",
+    "serverless": "^1.69.0",
+    "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.1.4",
     "serverless-plugin-typescript": "^1.1.9",
-    "serverless-dynamodb-local": "^0.2.39",
     "typescript": "^3.8.3"
   },
   "scripts": {
